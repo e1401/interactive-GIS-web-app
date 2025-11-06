@@ -1,12 +1,12 @@
-import Map from './components/Map';
+import CustomMap from './components/Map';
 
 
 function App() {
  
 
   return (
- <div>
-    <Map />
+ <div className='h-screen w-screen relative'>
+    <CustomMap />
  </div>
   )
 }

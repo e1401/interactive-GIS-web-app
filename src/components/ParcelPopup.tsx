@@ -14,10 +14,10 @@ const ParcelPopup = ({ visible, position, properties, onClose }: ParcelPopupProp
 
   return (
     <div
-      className="absolute bg-white rounded-lg shadow-lg p-4 min-w-64 max-w-96 z-50"
+      className="absolute bg-white rounded-lg shadow-lg p-4 w-64 z-50"
       style={{
-        left: `${position.x + 10}px`,
-        top: `${position.y + 10}px`,
+        left: `${position.x}px`,
+        top: `${position.y}px`,
       }}
     >
       <div className="flex justify-between items-center mb-3 border-b pb-2">

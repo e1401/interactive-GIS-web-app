@@ -19,7 +19,7 @@ const CROATIA_COORDINATES = transformExtent([
 // Component that captures the map instance from react-openlayers and stores it in context
 const MapInitializer = () => {
   const map = useMap(); // Get map from react-openlayers
-  const { setMap } = useMapContext(); // Get setMap from the custom context
+  const { setMap } = useMapContext(); 
 
   useEffect(() => {
     if (map) {
@@ -39,8 +39,8 @@ const CustomMap = () =>  {
   const view = new View({
     center: HOME_COORDINATES,
     extent: CROATIA_COORDINATES,
-    zoom: 8,
-    maxZoom: 12,
+    zoom: 16,
+    maxZoom: 20,
     minZoom: 4,
     constrainOnlyCenter: false,
     projection: 'EPSG:3857',

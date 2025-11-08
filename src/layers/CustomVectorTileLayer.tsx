@@ -6,7 +6,8 @@ import MVT from 'ol/format/MVT';
 import { Style, Stroke, Fill } from 'ol/style';
 import type { FeatureLike } from 'ol/Feature';
 import ParcelPopup from '../components/ParcelPopup';
-import type { CadastralProperties } from '../types';
+import { calculatePopupPosition } from '../utils/popupPositioning';
+import type { Position } from '../types';
 
 const API_URL = "https://gis-dev.listlabs.net/api/tegola/tegola-capabilities";
 
@@ -19,14 +20,24 @@ interface TegolaCapabilities {
   maps: TegolaMap[];
 }
 
+interface PopupState {
+  visible: boolean;
+  position: Position | null;
+  selectedFeatureId: number | null;
+}
+
+const initialPopupState: PopupState = {
+  visible: false,
+  position: null,
+  selectedFeatureId: null,
+};
+
 const CustomVectorTileLayer = () => {
   const { map } = useMapContext();
   const [tileUrl, setTileUrl] = useState<string | null>(null);
-  const [selectedFeatureId, setSelectedFeatureId] = useState<string | number | null>(null);
-  const [popupVisible, setPopupVisible] = useState(false);
-  const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
-  const [featureProperties, setFeatureProperties] = useState<CadastralProperties | null>(null);
+  const [popup, setPopup] = useState<PopupState>(initialPopupState);
   const layerRef = useRef<VectorTileLayer | null>(null);
+
 
 
   useEffect(() => {
@@ -61,7 +72,7 @@ const CustomVectorTileLayer = () => {
 
     const styleFunction = (feature: FeatureLike) => {
       const featureId = feature.getId();
-      const isSelected = featureId !== undefined && featureId === selectedFeatureId;
+      const isSelected = featureId !== undefined && featureId === popup.selectedFeatureId;
 
       return new Style({
         stroke: new Stroke({
@@ -96,57 +107,28 @@ const CustomVectorTileLayer = () => {
       });
 
       if (clickedFeature) {
-        const properties = clickedFeature.getProperties();
         const featureId = clickedFeature.getId();
 
         const mapSize = map.getSize();
         if (!mapSize) return;
 
         const [mapWidth, mapHeight] = mapSize;
-        const clickX = event.pixel[0];
-        const clickY = event.pixel[1];
-
         const popupWidth = 256; // w-64 = 16rem = 256px
         const popupHeight = 200;
 
-        let x: number;
-        let y: number;
+        const position = calculatePopupPosition(
+          { x: event.pixel[0], y: event.pixel[1] },
+          { width: popupWidth, height: popupHeight },
+          { width: mapWidth, height: mapHeight }
+        );
 
-        // Horizontal positioning: check if there's room on the right
-        if (clickX + popupWidth <= mapWidth) {
-          // Room on right, place popup at click point
-          x = clickX;
-        } else {
-          // No room on right, place popup to the left of click
-          x = clickX - popupWidth;
-          // If that goes off left edge, clamp it
-          if (x < 0) {
-            x = 0;
-          }
-        }
-
-        // Vertical positioning: check if there's room below
-        if (clickY + popupHeight <= mapHeight) {
-          // Room below, place popup at click point
-          y = clickY;
-        } else {
-          // No room below, place popup above click
-          y = clickY - popupHeight;
-          // If that goes off top edge, clamp it
-          if (y < 0) {
-            y = 0;
-          }
-        }
-
-        setSelectedFeatureId(featureId);
-        setFeatureProperties(properties);
-        setPopupPosition({ x, y });
-        setPopupVisible(true);
+        setPopup({
+          visible: true,
+          position,
+          selectedFeatureId: featureId,
+        });
       } else {
-        setSelectedFeatureId(null);
-        setFeatureProperties(null);
-        setPopupVisible(false);
-        setPopupPosition(null);
+        setPopup(initialPopupState);
       }
     };
 
@@ -157,26 +139,23 @@ const CustomVectorTileLayer = () => {
       map.removeLayer(layer);
       layerRef.current = null;
     };
-  }, [map, tileUrl, selectedFeatureId]);
+  }, [map, tileUrl, popup.selectedFeatureId]);
 
   useEffect(() => {
     if (layerRef.current) {
       layerRef.current.changed();
     }
-  }, [selectedFeatureId]);
+  }, [popup.selectedFeatureId]);
 
   const handleClosePopup = () => {
-    setSelectedFeatureId(null);
-    setFeatureProperties(null);
-    setPopupVisible(false);
-    setPopupPosition(null);
+    setPopup(initialPopupState);
   };
 
   return (
     <ParcelPopup
-      visible={popupVisible}
-      position={popupPosition}
-      properties={featureProperties}
+      visible={popup.visible}
+      position={popup.position}
+      id={popup.selectedFeatureId}
       onClose={handleClosePopup}
     />
   );

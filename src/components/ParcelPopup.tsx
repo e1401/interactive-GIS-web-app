@@ -1,16 +1,46 @@
-import type { CadastralProperties } from "../types";
+import { useEffect, useState } from "react";
+import type { Position, ParcelData } from "../types";
 
 interface ParcelPopupProps {
   visible: boolean;
-  position: { x: number; y: number } | null;
-  properties: CadastralProperties | null;
+  position: Position | null;
+  id: number | null;
   onClose: () => void;
 }
 
-const ParcelPopup = ({ visible, position, properties, onClose }: ParcelPopupProps) => {
-  if (!visible || !position || !properties) return null;
+const API_URL = "https://gis-dev.listlabs.net/api/dkp/parcels"
 
-  console.log("properties are,", properties)
+const ParcelPopup = ({ visible, position, id, onClose }: ParcelPopupProps) => {
+  const [parcelData, setParcelData] = useState<ParcelData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchParcelData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(API_URL + `/${id}/`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setParcelData({
+          parcel_number: data.properties.parcel_number,
+          area: data.properties.area,
+        });
+      } catch (err) {
+        console.error('Error fetching parcel data:', err);
+        setParcelData(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchParcelData();
+  }, [id]);
+
+  if (!visible || !position || !id) return null;
 
   return (
     <div
@@ -32,20 +62,24 @@ const ParcelPopup = ({ visible, position, properties, onClose }: ParcelPopupProp
       </div>
 
       <div className="space-y-2">
-        {Object.entries(properties).map(([key, value]) => {
-          if (key === 'geometry' || key === 'layer') return null;
-
-          return (
-            <div key={key} className="flex flex-col">
-              <span className="text-sm font-semibold text-gray-600 capitalize">
-                {key.replace(/_/g, ' ')}:
-              </span>
-              <span className="text-sm text-gray-900 ml-2">
-                {value !== null && value !== undefined ? String(value) : 'N/A'}
-              </span>
+        {isLoading ? (
+          <div className="flex justify-center items-center py-4">
+            <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+          </div>
+        ) : parcelData ? (
+          <>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold text-gray-600">Parcel Number:</span>
+              <span className="text-sm text-gray-900 ml-2">{parcelData.parcel_number}</span>
             </div>
-          );
-        })}
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold text-gray-600">Area:</span>
+              <span className="text-sm text-gray-900 ml-2">{parcelData.area}</span>
+            </div>
+          </>
+        ) : (
+          <div className="text-sm text-red-600">Failed to load parcel data</div>
+        )}
       </div>
     </div>
   );

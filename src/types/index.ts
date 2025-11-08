@@ -1,6 +1,13 @@
+export interface Position {
+  x: number;
+  y: number;
+}
 
-export interface CadastralProperties {
-    parcel_number: string,
-    area: string,
-    layer: 'cadastral_parcels'
+export interface ParcelData {
+  parcel_number: string;
+  area: string;
+}
+
+export interface CadastralProperties extends ParcelData {
+  layer: 'cadastral_parcels';
 }

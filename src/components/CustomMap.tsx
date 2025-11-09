@@ -50,7 +50,7 @@ const CustomMap = () =>  {
     <div className="absolute inset-0">
        <Map view={view}>
          <MapInitializer />
-         <TileLayer source={new OSM()} />
+         <TileLayer source={new OSM()} zIndex={0} />
          <DragRotateAndZoomInteraction />
       </Map>
     </div>

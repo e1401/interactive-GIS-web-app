@@ -91,6 +91,7 @@ const CustomVectorTileLayer = () => {
         url: tileUrl,
       }),
       style: styleFunction,
+      zIndex: 2,
     });
 
     map.addLayer(layer);

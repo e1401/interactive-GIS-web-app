@@ -133,10 +133,18 @@ const CustomVectorTileLayer = () => {
       }
     };
 
+    const handleMapMove = () => {
+      if (popup.visible) {
+        setPopup(initialPopupState);
+      }
+    };
+
     map.on('click', handleMapClick);
+    map.on('movestart', handleMapMove);
 
     return () => {
       map.un('click', handleMapClick);
+      map.un('movestart', handleMapMove);
       map.removeLayer(layer);
       layerRef.current = null;
     };

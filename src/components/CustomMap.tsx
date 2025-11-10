@@ -18,8 +18,8 @@ const CROATIA_COORDINATES = transformExtent([
 
 // Component that captures the map instance from react-openlayers and stores it in context
 const MapInitializer = () => {
-  const map = useMap(); // Get map from react-openlayers
-  const { setMap } = useMapContext(); 
+  const map = useMap(); // Get map from context
+  const { setMap } = useMapContext();
 
   useEffect(() => {
     if (map) {
@@ -31,11 +31,11 @@ const MapInitializer = () => {
     };
   }, [map, setMap]);
 
-  return null; 
+  return null;
 };
 
-const CustomMap = () =>  {
-    
+const CustomMap = () => {
+
   const view = new View({
     center: HOME_COORDINATES,
     extent: CROATIA_COORDINATES,
@@ -48,10 +48,10 @@ const CustomMap = () =>  {
 
   return (
     <div className="absolute inset-0">
-       <Map view={view}>
-         <MapInitializer />
-         <TileLayer source={new OSM()} zIndex={0} />
-         <DragRotateAndZoomInteraction />
+      <Map view={view}>
+        <MapInitializer />
+        <TileLayer source={new OSM()} zIndex={0} />
+        <DragRotateAndZoomInteraction />
       </Map>
     </div>
   );

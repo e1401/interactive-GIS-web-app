@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useMapContext } from '../context/mapContex';
+import { useMapContext } from '../hooks/useMapContext';
 import TileLayer from 'ol/layer/Tile';
 
 import TileWMS from 'ol/source/TileWMS';
@@ -42,7 +42,7 @@ const CorineLayer = ({ visible }: CorineLayerProps) => {
         layerRef.current = null;
       }
     };
-  }, [map]);
+  }, [map, visible]);
 
   useEffect(() => {
     if (layerRef.current) {

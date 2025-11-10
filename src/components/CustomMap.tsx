@@ -1,10 +1,10 @@
+import { useEffect } from 'react';
 import { OSM } from 'ol/source';
 import { Map, TileLayer, DragRotateAndZoomInteraction, useMap } from 'react-openlayers';
 import { fromLonLat, transformExtent } from 'ol/proj';
 import { View } from 'ol';
-import { useEffect } from 'react';
-import { useMapContext } from '../context/mapContex';
-import 'react-openlayers/dist/index.css'; // for css
+import { useMapContext } from '../hooks/useMapContext';
+import 'react-openlayers/dist/index.css';
 
 // Coordinates in [longitude, latitude] format, important
 const HOME_COORDINATES = fromLonLat([16.41774079137637, 46.20919794776915]);
@@ -16,9 +16,9 @@ const CROATIA_COORDINATES = transformExtent([
   46.5551  // max latitude
 ], 'EPSG:4326', 'EPSG:3857');
 
-// Component that captures the map instance from react-openlayers and stores it in context
+// MapInitializer captures  map instance from react-openlayers and stores it in context
 const MapInitializer = () => {
-  const map = useMap(); // Get map from context
+  const map = useMap();
   const { setMap } = useMapContext();
 
   useEffect(() => {

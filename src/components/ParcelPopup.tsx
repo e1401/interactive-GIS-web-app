@@ -4,7 +4,7 @@ import type { Position, ParcelData } from "../types";
 interface ParcelPopupProps {
   visible: boolean;
   position: Position | null;
-  id: number | null;
+  id: number | string | null;
   onClose: () => void;
 }
 

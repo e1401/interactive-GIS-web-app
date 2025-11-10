@@ -1,4 +1,4 @@
-import { createContext, useState, useContext } from 'react';
+import { createContext, useState } from 'react';
 import type { ReactNode } from 'react';
 import type OLMap from 'ol/Map';
 
@@ -17,15 +17,6 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </MapContext.Provider>
   );
-};
-
-
-export const useMapContext = () => {
-  const context = useContext(MapContext);
-  if (!context) {
-    throw new Error('useMapContext must be used within MapProvider');
-  }
-  return context;
 };
 
 export default MapContext;

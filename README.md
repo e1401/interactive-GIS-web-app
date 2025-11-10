@@ -1,75 +1,139 @@
-# React + TypeScript + Vite
+# Interactive Web GIS Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An interactive web-based Geographic Information System (GIS) application for Croatia, built with OpenLayers and React. The application displays cadastral parcels and CORINE Land Cover 2018 data with interactive features.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Interactive map view constrained to Croatia's geographical boundaries
+- Cadastral parcel layer with click-to-select functionality
+- CORINE Land Cover 2018 WMS layer with toggle control
+- Popup display showing detailed parcel information
+- Feature highlighting on selection
 
-## React Compiler
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+## Tech Stack
 
-Note: This will impact Vite dev & build performances.
+- **Frontend Framework**: React 18 with TypeScript
+- **Mapping Library**: OpenLayers 10
+- **Styling**: Tailwind CSS v4
+- **Vector Tiles**: Mapbox Vector Tiles (MVT) format
+- **Build Tool**: Vite
+- **Package Manager**: npm
 
-## Expanding the ESLint configuration
+## Prerequisites
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Node.js (v18 or higher recommended)
+- npm or yarn
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Installation
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+```bash
+# Clone the repository
+git clone <repository-url>
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Navigate to project directory
+cd interactive-web-GIS-app
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Project Structure
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+├── components/
+│   ├── CustomMap.tsx          # Base map component with OSM tiles
+│   ├── MapInitializer.tsx     # Bridge between react-openlayers and custom context
+│   ├── ParcelPopup.tsx        # Popup component for parcel details
+│   └── LayerToggle.tsx        # Toggle control for CORINE layer
+├── context/
+│   └── mapContext.tsx         # Shared Map Context for OpenLayers instance
+├── layers/
+│   ├── CustomVectorTileLayer.tsx  # Cadastral parcels vector tile layer
+│   └── CorineLayer.tsx        # CORINE Land Cover 2018 WMS layer
+├── types/
+│   └── index.ts               # Shared TypeScript interfaces
+├── utils/
+│   └── popupPositioning.ts    # Popup positioning utility functions
+└── App.tsx                    # Main application component
+```
+
+## Data Sources
+
+### Cadastral Parcels
+- **Source**: Tegola vector tile server
+- **Endpoint**: `https://gis-dev.listlabs.net/api/tegola/tegola-capabilities`
+- **Format**: Mapbox Vector Tiles (MVT)
+- **Layer**: cadastral_parcels
+- **Z-Index**: 2 (top layer)
+
+### CORINE Land Cover 2018
+- **Source**: European Environment Agency (EEA)
+- **Endpoint**: `https://image.discomap.eea.europa.eu/arcgis/services/Corine/CLC2018_WM/MapServer/WMSServer`
+- **Protocol**: WMS 1.3.0
+- **Layer**: 13 (Mainland Europe vector)
+- **Z-Index**: 1 (middle layer)
+- **Opacity**: 0.7
+
+### Base Map
+- **Source**: OpenStreetMap (OSM)
+- **Z-Index**: 0 (bottom layer)
+
+## Development
+
+### Available Scripts
+
+```bash
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Lint code
+npm run lint
+```
+
+### Key Configuration
+
+**Map Boundaries (Croatia)**
+- Projection: EPSG:3857 (Web Mercator)
+- Extent: [1392000, 5175000, 2080000, 5850000]
+
+**CORINE Land Cover Layers**
+- Layer 12: Raster format (for overview/zoomed out view)
+- Layer 13: Vector format (for detailed/zoomed in view)
+
+## Map Interactions
+
+### Parcel Selection
+- Click on any cadastral parcel to select it
+- Selected parcels are highlighted in green
+- Popup displays parcel number and area
+- Popup automatically closes when map is panned
+
+### Layer Toggle
+- Use the "Show/Hide Land Cover" button in the top-right corner
+- Toggles the visibility of the CORINE Land Cover layer
+
+
+## Browser Support
+
+Modern browsers with support for:
+- ES6+ JavaScript
+- WebGL (for OpenLayers rendering)
+- Fetch API
+
+## Known Issues
+
+- CORINE layer visibility depends on zoom level (MinScaleDenominator/MaxScaleDenominator constraints)
+- Layer 13 (vector) may not render at very low zoom levels
+
+

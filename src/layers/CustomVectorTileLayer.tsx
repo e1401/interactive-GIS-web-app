@@ -1,13 +1,18 @@
 import { useEffect, useState, useRef } from 'react';
-import { useMapContext } from '../context/mapContex';
+import { useMapContext } from '../hooks/useMapContext';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import VectorTileSource from 'ol/source/VectorTile';
 import MVT from 'ol/format/MVT';
 import { Style, Stroke, Fill } from 'ol/style';
 import type { FeatureLike } from 'ol/Feature';
+import type { MapBrowserEvent } from 'ol';
 import ParcelPopup from '../components/ParcelPopup';
 import { calculatePopupPosition } from '../utils/popupPositioning';
 import type { Position } from '../types';
+
+type FeatureWithId = FeatureLike & { getId(): number | string | undefined };
+
+type MapEventHandler = (type: string, listener: () => void) => void;
 
 const API_URL = "https://gis-dev.listlabs.net/api/tegola/tegola-capabilities";
 
@@ -23,7 +28,7 @@ interface TegolaCapabilities {
 interface PopupState {
   visible: boolean;
   position: Position | null;
-  selectedFeatureId: number | null;
+  selectedFeatureId: number | string | null;
 }
 
 const initialPopupState: PopupState = {
@@ -54,7 +59,7 @@ const CustomVectorTileLayer = () => {
 
         if (parcelsMap && parcelsMap.tiles && parcelsMap.tiles.length > 0) {
           setTileUrl(parcelsMap.tiles[0]);
-          console.log('Cadastral parcels tile URL:', parcelsMap.tiles[0]);
+
         } else {
           console.error('cadastral_parcels layer not found in capabilities');
         }
@@ -97,10 +102,10 @@ const CustomVectorTileLayer = () => {
     map.addLayer(layer);
     layerRef.current = layer;
 
-    const handleMapClick = (event: any) => {
-      let clickedFeature: any = null;
+    const handleMapClick = (event: MapBrowserEvent<PointerEvent>) => {
+      let clickedFeature: FeatureLike | null = null;
 
-      map.forEachFeatureAtPixel(event.pixel, (feature, mapLayer) => {
+      map.forEachFeatureAtPixel(event.pixel, (feature: FeatureLike, mapLayer) => {
         if (mapLayer === layer) {
           clickedFeature = feature;
           return true;
@@ -108,7 +113,7 @@ const CustomVectorTileLayer = () => {
       });
 
       if (clickedFeature) {
-        const featureId = clickedFeature.getId();
+        const featureId = (clickedFeature as FeatureWithId).getId() ?? null;
 
         const mapSize = map.getSize();
         if (!mapSize) return;
@@ -139,16 +144,19 @@ const CustomVectorTileLayer = () => {
       }
     };
 
+    const addEvent = map.on.bind(map) as MapEventHandler;
+    const removeEvent = map.un.bind(map) as MapEventHandler;
+
     map.on('click', handleMapClick);
-    map.on('movestart', handleMapMove);
+    addEvent('movestart', handleMapMove);
 
     return () => {
       map.un('click', handleMapClick);
-      map.un('movestart', handleMapMove);
+      removeEvent('movestart', handleMapMove);
       map.removeLayer(layer);
       layerRef.current = null;
     };
-  }, [map, tileUrl, popup.selectedFeatureId]);
+  }, [map, tileUrl, popup.selectedFeatureId, popup.visible]);
 
   useEffect(() => {
     if (layerRef.current) {

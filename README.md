@@ -51,7 +51,9 @@ src/
 │   ├── ParcelPopup.tsx        # Popup component for parcel details
 │   └── LayerToggle.tsx        # Toggle control for CORINE layer
 ├── context/
-│   └── mapContext.tsx         # Shared Map Context for OpenLayers instance
+│   └── mapContext.tsx         # Map Context and Provider component
+├── hooks/
+│   └── useMapContext.ts       # Custom hook for accessing map context
 ├── layers/
 │   ├── CustomVectorTileLayer.tsx  # Cadastral parcels vector tile layer
 │   └── CorineLayer.tsx        # CORINE Land Cover 2018 WMS layer
